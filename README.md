@@ -12,7 +12,7 @@ Llenás una planilla (CSV o Google Sheet) con año, RSG, rol, nombre y foto. El 
 3. Elegís año, RSG, **modelo** (hex / clean / bold) y formato, y ves los flyers en vivo.
 4. Descargás cada PNG o todos juntos en un ZIP (2160 px).
 
-Si el sheet no se puede leer, también se puede copiar y pegar cada pestaña. Las fotos pueden ser links de Drive o archivos que se arrastran a la página (se emparejan por nombre de archivo).
+Dos formas de cargar los datos: **Link del sheet** o **Subir tabla** (Excel .xlsx con pestañas `members` y `rsgs`, o uno o dos .csv; también se puede pegar). La página ofrece una plantilla .xlsx para empezar. Acepta encabezados en español (año, rol, nombre, foto, orden). Las fotos pueden ser links de Drive o archivos que se arrastran a la página (se emparejan por nombre de archivo).
 
 Activarlo: **Settings → Pages → Source: GitHub Actions**. La app queda en `https://<usuario>.github.io/<repo>/`.
 Los diseños salen de `templates/`: si editás un tema, `web/build.py` lo copia a la app (el workflow lo corre solo).

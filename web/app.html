@@ -41,6 +41,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
 .app {
   max-width: 1440px; margin: 0 auto;
@@ -113,6 +114,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .drop b { color: var(--ink); }
 
+.pane { display: grid; gap: 12px; }
+details.paste summary { cursor: pointer; font-size: 12.5px; color: var(--muted); }
+details.paste[open] { display: grid; gap: 10px; }
 .warns { display: grid; gap: 4px; font-size: 12px; color: var(--warn); margin: 0; padding-left: 18px; }
 
 /* ---------- results ---------- */
@@ -147,7 +151,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 <div class="app">
   <header class="top">
     <h1>RSG <span>Flyer Studio</span></h1>
-    <p>Pegá el link del Google Sheet del comité, elegí año y modelo, y descargá los flyers de liderazgo de cada RSG.</p>
+    <p>Cargá la tabla del comité (link de Google Sheets o archivo), elegí año y modelo, y descargá los flyers de liderazgo de cada RSG.</p>
   </header>
 
   <div class="layout">
@@ -156,7 +160,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
         <h2 id="h-data"><span><span class="step">1</span> · Datos</span></h2>
         <div class="tabs" role="tablist">
           <button role="tab" id="tab-link" aria-selected="true" data-pane="pane-link">Link del sheet</button>
-          <button role="tab" id="tab-paste" aria-selected="false" data-pane="pane-paste">Pegar tabla</button>
+          <button role="tab" id="tab-paste" aria-selected="false" data-pane="pane-paste">Subir tabla</button>
         </div>
 
         <div id="pane-link" class="pane">
@@ -168,6 +172,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
         </div>
 
         <div id="pane-paste" class="pane" hidden>
+          <div class="drop" id="drop-table">
+            <input id="file-table" type="file" accept=".xlsx,.xls,.ods,.csv,.tsv,.txt" multiple aria-label="Subir tabla">
+            <b>Soltá tu tabla acá o tocá para elegirla</b><br>Excel (.xlsx) con pestañas <span class="mono">members</span> y <span class="mono">rsgs</span>, o uno o dos .csv
+          </div>
+          <details class="paste">
+            <summary>O copiá y pegá las pestañas</summary>
           <label class="field">Pestaña <span class="mono">members</span>
             <textarea id="paste-members" placeholder="Seleccioná toda la pestaña en el sheet (Ctrl+A), copiá y pegá acá"></textarea>
           </label>
@@ -175,13 +185,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
             <textarea id="paste-rsgs" placeholder="rsg, display_name, country, website, logo, flag_colors, flag_layout, accent, handle, email"></textarea>
           </label>
           <button id="load-paste" class="btn primary" type="button">Usar estos datos</button>
+          </details>
         </div>
 
         <div id="data-status" class="status demo">Mostrando datos de ejemplo. Los nombres son inventados.</div>
         <div class="row">
-          <button id="tpl-members" class="btn small" type="button">Plantilla members.csv</button>
-          <button id="tpl-rsgs" class="btn small" type="button">Plantilla rsgs.csv</button>
+          <button id="tpl-xlsx" class="btn small" type="button">Descargar plantilla (.xlsx)</button>
         </div>
+        <p class="hint" style="margin-top:-4px">Sirve para Excel o para importar en Google Sheets (Archivo → Importar).</p>
       </section>
 
       <section class="box" aria-labelledby="h-pick">
@@ -242,6 +253,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 (() => {
 "use strict";
@@ -389,12 +401,45 @@ async function loadSheet() {
     const msg = e.message === "private"
       ? "El sheet es privado. Compartilo como «Cualquier persona con el enlace · Lector» y probá de nuevo."
       : e.message.startsWith("No encontré") ? e.message
-      : "No pude leer el sheet desde esta página. Revisá que esté compartido con el enlace, o copiá y pegá las pestañas acá.";
+      : "No pude leer el sheet desde esta página. Revisá que esté compartido con el enlace, o descargalo como .xlsx (Archivo → Descargar) y subilo acá.";
     status("err", msg);
     if (e.message !== "private" && !e.message.startsWith("No encontré")) document.getElementById("tab-paste").click();
   } finally { btn.disabled = false; }
 }
 function status(kind, text) { const st = $("#data-status"); st.className = "status " + kind; st.textContent = text; }
+
+// ------------------------------------------------------------------ uploaded tables
+const isMembers = (rows) => rows.length && "year" in rows[0] && "name" in rows[0];
+const isRsgs = (rows) => rows.length && "rsg" in rows[0] && !("name" in rows[0]);
+async function loadTableFiles(files) {
+  const found = { members: null, rsgs: null };
+  const consider = (name, rows) => {
+    const n = name.toLowerCase();
+    if (!found.members && (isMembers(rows) || (/member|miembro/.test(n) && rows.length))) found.members = rows;
+    else if (!found.rsgs && isRsgs(rows)) found.rsgs = rows;
+  };
+  for (const f of files) {
+    if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
+      if (!window.XLSX) throw new Error("No se pudo cargar el lector de Excel. Probá con .csv.");
+      const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
+      // named tabs first, then anything that looks right
+      const order = [...wb.SheetNames].sort((a, b) => (/^(members|rsgs)$/i.test(b) ? 1 : 0) - (/^(members|rsgs)$/i.test(a) ? 1 : 0));
+      for (const sn of order) consider(sn, parseTable(XLSX.utils.sheet_to_csv(wb.Sheets[sn], { blankrows: false })));
+    } else {
+      consider(f.name, parseTable(await f.text()));
+    }
+  }
+  if (!found.members) throw new Error("No encontré una tabla de miembros (columnas year, rsg, role, name).");
+  setData(found.members, found.rsgs || []);
+  status("ok", `Tabla cargada: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG${found.rsgs ? "" : " (sin tabla rsgs: uso valores por defecto)"}.`);
+}
+function templateXlsx() {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(Papa.parse(DEMO_MEMBERS).data), "members");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(Papa.parse(DEMO_RSGS).data), "rsgs");
+  const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
 
 // ------------------------------------------------------------------ images
 function baseName(v) { return String(v).split(/[\\/]/).pop().toLowerCase(); }
@@ -694,8 +739,19 @@ function init() {
       status("ok", `Datos cargados: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG.`);
     } catch (e) { status("err", e.message.startsWith("No encontré") ? e.message : "No pude leer la tabla. Copiala con los encabezados incluidos."); }
   });
-  $("#tpl-members").addEventListener("click", () => saveFile("members.csv", new Blob([DEMO_MEMBERS + "\n"], { type: "text/csv" })));
-  $("#tpl-rsgs").addEventListener("click", () => saveFile("rsgs.csv", new Blob([DEMO_RSGS + "\n"], { type: "text/csv" })));
+  $("#tpl-xlsx").addEventListener("click", () => {
+    if (window.XLSX) saveFile("rsg-flyers-plantilla.xlsx", templateXlsx());
+    else saveFile("members.csv", new Blob([DEMO_MEMBERS + "\n"], { type: "text/csv" }));
+  });
+  const tableIn = $("#file-table"), tableZone = $("#drop-table");
+  const takeTables = async (files) => {
+    if (!files.length) return;
+    try { await loadTableFiles([...files]); } catch (e) { status("err", e.message || "No pude leer ese archivo."); }
+  };
+  tableIn.addEventListener("change", async () => { await takeTables(tableIn.files); tableIn.value = ""; });
+  ["dragenter", "dragover"].forEach((ev) => tableZone.addEventListener(ev, (e) => { e.preventDefault(); tableZone.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => tableZone.addEventListener(ev, () => tableZone.classList.remove("over")));
+  tableZone.addEventListener("drop", (e) => { e.preventDefault(); takeTables(e.dataTransfer.files); });
 
   $("#year").addEventListener("change", onYear);
   $("#toggle-all").addEventListener("click", () => {
