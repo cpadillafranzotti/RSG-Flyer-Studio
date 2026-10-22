@@ -151,87 +151,87 @@ details.paste[open] { display: grid; gap: 10px; }
 <div class="app">
   <header class="top">
     <h1>RSG <span>Flyer Studio</span></h1>
-    <p>Cargá la tabla del comité (link de Google Sheets o archivo), elegí año y modelo, y descargá los flyers de liderazgo de cada RSG.</p>
+    <p>Load your committee table (Google Sheets link or file), pick a year and a design, and download the leadership flyers for every RSG.</p>
   </header>
 
   <div class="layout">
     <aside class="rail">
       <section class="box" aria-labelledby="h-data">
-        <h2 id="h-data"><span><span class="step">1</span> · Datos</span></h2>
+        <h2 id="h-data"><span><span class="step">1</span> · Data</span></h2>
         <div class="tabs" role="tablist">
-          <button role="tab" id="tab-link" aria-selected="true" data-pane="pane-link">Link del sheet</button>
-          <button role="tab" id="tab-paste" aria-selected="false" data-pane="pane-paste">Subir tabla</button>
+          <button role="tab" id="tab-link" aria-selected="true" data-pane="pane-link">Sheet link</button>
+          <button role="tab" id="tab-paste" aria-selected="false" data-pane="pane-paste">Upload table</button>
         </div>
 
         <div id="pane-link" class="pane">
           <label class="field">Google Sheet
             <input id="sheet-url" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
           </label>
-          <p class="hint">Compartido como <em>Cualquier persona con el enlace · Lector</em>, con pestañas <code>members</code> y <code>rsgs</code>.</p>
-          <button id="load-sheet" class="btn primary" type="button">Cargar sheet</button>
+          <p class="hint">Shared as <em>Anyone with the link · Viewer</em>, with tabs <code>members</code> and <code>rsgs</code>.</p>
+          <button id="load-sheet" class="btn primary" type="button">Load sheet</button>
         </div>
 
         <div id="pane-paste" class="pane" hidden>
           <div class="drop" id="drop-table">
-            <input id="file-table" type="file" accept=".xlsx,.xls,.ods,.csv,.tsv,.txt" multiple aria-label="Subir tabla">
-            <b>Soltá tu tabla acá o tocá para elegirla</b><br>Excel (.xlsx) con pestañas <span class="mono">members</span> y <span class="mono">rsgs</span>, o uno o dos .csv
+            <input id="file-table" type="file" accept=".xlsx,.xls,.ods,.csv,.tsv,.txt" multiple aria-label="Upload table">
+            <b>Drop your table here or tap to choose it</b><br>Excel (.xlsx) with tabs <span class="mono">members</span> and <span class="mono">rsgs</span>, or one or two .csv files
           </div>
           <details class="paste">
-            <summary>O copiá y pegá las pestañas</summary>
-          <label class="field">Pestaña <span class="mono">members</span>
-            <textarea id="paste-members" placeholder="Seleccioná toda la pestaña en el sheet (Ctrl+A), copiá y pegá acá"></textarea>
+            <summary>Or copy and paste the tabs</summary>
+          <label class="field">Tab <span class="mono">members</span>
+            <textarea id="paste-members" placeholder="Select the whole tab in your sheet (Ctrl+A), copy and paste it here"></textarea>
           </label>
-          <label class="field">Pestaña <span class="mono">rsgs</span> <span class="hint" style="font-weight:400">(opcional)</span>
+          <label class="field">Tab <span class="mono">rsgs</span> <span class="hint" style="font-weight:400">(optional)</span>
             <textarea id="paste-rsgs" placeholder="rsg, display_name, country, website, logo, flag_colors, flag_layout, accent, handle, email"></textarea>
           </label>
-          <button id="load-paste" class="btn primary" type="button">Usar estos datos</button>
+          <button id="load-paste" class="btn primary" type="button">Use this data</button>
           </details>
         </div>
 
-        <div id="data-status" class="status demo">Mostrando datos de ejemplo. Los nombres son inventados.</div>
+        <div id="data-status" class="status demo">Showing example data. All names are made up.</div>
         <div class="row">
-          <button id="tpl-xlsx" class="btn small" type="button">Descargar plantilla (.xlsx)</button>
+          <button id="tpl-xlsx" class="btn small" type="button">Download template (.xlsx)</button>
         </div>
-        <p class="hint" style="margin-top:-4px">Sirve para Excel o para importar en Google Sheets (Archivo → Importar).</p>
+        <p class="hint" style="margin-top:-4px">Works in Excel, or import it into Google Sheets (File → Import).</p>
       </section>
 
       <section class="box" aria-labelledby="h-pick">
-        <h2 id="h-pick"><span><span class="step">2</span> · Qué generar</span></h2>
-        <label class="field">Año
+        <h2 id="h-pick"><span><span class="step">2</span> · What to make</span></h2>
+        <label class="field">Year
           <select id="year"></select>
         </label>
         <div class="field" style="display:grid;gap:6px;font-size:13px;font-weight:600">
-          <span style="display:flex;justify-content:space-between;align-items:center">RSG activos
-            <button id="toggle-all" class="chip" type="button" style="font-size:11.5px;padding:3px 9px">Todos</button></span>
+          <span style="display:flex;justify-content:space-between;align-items:center">Active RSGs
+            <button id="toggle-all" class="chip" type="button" style="font-size:11.5px;padding:3px 9px">All</button></span>
           <div id="rsg-chips" class="chips"></div>
         </div>
-        <label class="field">Título
+        <label class="field">Title
           <input id="title" type="text" value="Leadership team">
         </label>
       </section>
 
       <section class="box" aria-labelledby="h-model">
-        <h2 id="h-model"><span><span class="step">3</span> · Modelo y formato</span></h2>
+        <h2 id="h-model"><span><span class="step">3</span> · Design and format</span></h2>
         <div id="models" class="models"></div>
-        <div class="field" style="display:grid;gap:6px;font-size:13px;font-weight:600">Colores
+        <div class="field" style="display:grid;gap:6px;font-size:13px;font-weight:600">Colours
           <div id="palettes" class="chips"></div>
         </div>
-        <div id="formats" class="seg" role="group" aria-label="Formato">
-          <button type="button" data-f="square" aria-pressed="true">Cuadrado<small>1080×1080</small></button>
-          <button type="button" data-f="portrait" aria-pressed="false">Vertical<small>1080×1350</small></button>
+        <div id="formats" class="seg" role="group" aria-label="Format">
+          <button type="button" data-f="square" aria-pressed="true">Square<small>1080×1080</small></button>
+          <button type="button" data-f="portrait" aria-pressed="false">Portrait<small>1080×1350</small></button>
           <button type="button" data-f="story" aria-pressed="false">Story<small>1080×1920</small></button>
         </div>
       </section>
 
       <section class="box" aria-labelledby="h-img">
-        <h2 id="h-img"><span><span class="step">4</span> · Fotos y logos</span><span id="img-count" class="hint" style="letter-spacing:0;text-transform:none"></span></h2>
+        <h2 id="h-img"><span><span class="step">4</span> · Photos and logos</span><span id="img-count" class="hint" style="letter-spacing:0;text-transform:none"></span></h2>
         <div class="drop" id="drop-photos">
-          <input id="file-photos" type="file" accept="image/*" multiple aria-label="Subir fotos y logos de RSG">
-          <b>Soltá fotos o logos acá</b><br>El nombre de archivo tiene que coincidir con la columna <span class="mono">photo</span> o <span class="mono">logo</span>
+          <input id="file-photos" type="file" accept="image/*" multiple aria-label="Upload RSG photos and logos">
+          <b>Drop photos or logos here</b><br>File names must match the <span class="mono">photo</span> or <span class="mono">logo</span> column
         </div>
         <div class="drop" id="drop-footer">
-          <input id="file-footer" type="file" accept="image/*" multiple aria-label="Subir logos del pie">
-          <b>Logos del pie</b>: ya incluye ISCB-SC e ISCB<br>Subí versiones oficiales para reemplazarlos (orden por nombre de archivo)
+          <input id="file-footer" type="file" accept="image/*" multiple aria-label="Upload footer logos">
+          <b>Footer logos</b>: ISCB-SC and ISCB included<br>Upload official versions to replace them (sorted by file name)
         </div>
         <ul id="warns" class="warns" hidden></ul>
       </section>
@@ -241,7 +241,7 @@ details.paste[open] { display: grid; gap: 10px; }
       <div class="bar">
         <div class="count" id="count"></div>
         <div class="row" style="flex:0 1 auto">
-          <button id="dl-all" class="btn primary" type="button">Descargar todos (ZIP)</button>
+          <button id="dl-all" class="btn primary" type="button">Download all (ZIP)</button>
         </div>
       </div>
       <div id="grid" class="grid"></div>
@@ -354,7 +354,7 @@ function setData(memberRows, rsgRows) {
   const members = memberRows
     .map((r) => ({ ...r, rsg: slugify(r.rsg), year: String(r.year || "").trim() }))
     .filter((r) => r.year && r.rsg && r.name);
-  if (!members.length) throw new Error("No encontré filas con year, rsg y name en la pestaña members.");
+  if (!members.length) throw new Error("No rows with year, rsg and name were found in the members tab.");
   state.members = members;
   state.rsgs = buildRsgs(rsgRows || []);
   for (const m of members) if (!state.rsgs[m.rsg]) state.rsgs[m.rsg] = buildRsgs([{ rsg: m.rsg }])[m.rsg];
@@ -380,8 +380,8 @@ async function loadSheet() {
   const url = $("#sheet-url").value.trim();
   const id = sheetId(url);
   const st = $("#data-status");
-  if (!id) { status("err", "Ese link no parece de Google Sheets. Tiene que contener /spreadsheets/d/…"); return; }
-  const btn = $("#load-sheet"); btn.disabled = true; status("", "Leyendo el sheet…");
+  if (!id) { status("err", "That doesn't look like a Google Sheets link. It should contain /spreadsheets/d/…"); return; }
+  const btn = $("#load-sheet"); btn.disabled = true; status("", "Reading the sheet…");
   try {
     let members = await fetchTab(id, { sheet: "members" });
     if (!members.length || !("year" in members[0] && "name" in members[0])) {
@@ -396,14 +396,14 @@ async function loadSheet() {
     } catch {}
     setData(members, rsgs);
     store.set("sheet", url);
-    status("ok", `Sheet cargado: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG${rsgs.length ? "" : " (sin pestaña rsgs: uso colores por defecto)"}.`);
+    status("ok", `Sheet loaded: ${state.members.length} people in ${Object.keys(state.rsgs).length} RSG${Object.keys(state.rsgs).length === 1 ? "" : "s"}${rsgs.length ? "" : " (no rsgs tab: using defaults)"}.`);
   } catch (e) {
     const msg = e.message === "private"
-      ? "El sheet es privado. Compartilo como «Cualquier persona con el enlace · Lector» y probá de nuevo."
-      : e.message.startsWith("No encontré") ? e.message
-      : "No pude leer el sheet desde esta página. Revisá que esté compartido con el enlace, o descargalo como .xlsx (Archivo → Descargar) y subilo acá.";
+      ? "The sheet is private. Share it as “Anyone with the link · Viewer” and try again."
+      : e.message.startsWith("No rows") ? e.message
+      : "Couldn't read the sheet from this page. Check that it's shared by link, or download it as .xlsx (File → Download) and upload it here.";
     status("err", msg);
-    if (e.message !== "private" && !e.message.startsWith("No encontré")) document.getElementById("tab-paste").click();
+    if (e.message !== "private" && !e.message.startsWith("No rows")) document.getElementById("tab-paste").click();
   } finally { btn.disabled = false; }
 }
 function status(kind, text) { const st = $("#data-status"); st.className = "status " + kind; st.textContent = text; }
@@ -420,7 +420,7 @@ async function loadTableFiles(files) {
   };
   for (const f of files) {
     if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
-      if (!window.XLSX) throw new Error("No se pudo cargar el lector de Excel. Probá con .csv.");
+      if (!window.XLSX) throw new Error("The Excel reader didn't load. Try a .csv file instead.");
       const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
       // named tabs first, then anything that looks right
       const order = [...wb.SheetNames].sort((a, b) => (/^(members|rsgs)$/i.test(b) ? 1 : 0) - (/^(members|rsgs)$/i.test(a) ? 1 : 0));
@@ -429,9 +429,9 @@ async function loadTableFiles(files) {
       consider(f.name, parseTable(await f.text()));
     }
   }
-  if (!found.members) throw new Error("No encontré una tabla de miembros (columnas year, rsg, role, name).");
+  if (!found.members) throw new Error("No rows with year, rsg and name were found (expected columns: year, rsg, role, name).");
   setData(found.members, found.rsgs || []);
-  status("ok", `Tabla cargada: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG${found.rsgs ? "" : " (sin tabla rsgs: uso valores por defecto)"}.`);
+  status("ok", `Table loaded: ${state.members.length} people in ${Object.keys(state.rsgs).length} RSG${Object.keys(state.rsgs).length === 1 ? "" : "s"}${found.rsgs ? "" : " (no rsgs table: using defaults)"}.`);
 }
 function templateXlsx() {
   const wb = XLSX.utils.book_new();
@@ -472,10 +472,10 @@ async function resolveImage(value, who) {
   const url = driveUrl(value) || (/^https?:\/\//.test(value) ? value : null);
   if (url) {
     const d = await fetchImage(url);
-    if (!d) state.warns.add(`${who}: no pude descargar la imagen. Subila en «Fotos y logos».`);
+    if (!d) state.warns.add(`${who}: couldn't download the image. Upload it under “Photos and logos”.`);
     return d;
   }
-  state.warns.add(`${who}: falta el archivo «${value}». Subilo en «Fotos y logos».`);
+  state.warns.add(`${who}: file “${value}” is missing. Upload it under “Photos and logos”.`);
   return null;
 }
 
@@ -590,13 +590,13 @@ async function render() {
   grid.innerHTML = "";
   ro.disconnect();
   if (!cards.length) {
-    grid.innerHTML = `<div class="empty">Elegí al menos un RSG para ver sus flyers.</div>`;
+    grid.innerHTML = `<div class="empty">Pick at least one RSG to see its flyers.</div>`;
   }
   for (const c of cards) {
     const card = document.createElement("article");
     card.className = "card";
     card.innerHTML = `<div class="stage">${c.html}</div>
-      <footer><div class="meta"><b>${esc(c.rsg.display_name)}</b><span>${c.team.length} ${c.team.length === 1 ? "persona" : "personas"} · ${esc(THEME_LABEL[state.theme] || state.theme)} · ${esc(PALETTES[state.palette].label)}</span></div>
+      <footer><div class="meta"><b>${esc(c.rsg.display_name)}</b><span>${c.team.length} ${c.team.length === 1 ? "person" : "people"} · ${esc(THEME_LABEL[state.theme] || state.theme)} · ${esc(PALETTES[state.palette].label)}</span></div>
       <button class="btn small" type="button">PNG</button></footer>`;
     grid.appendChild(card);
     const stage = card.querySelector(".stage");
@@ -617,7 +617,7 @@ function renderWarnings() {
   ul.innerHTML = [...state.warns].map((w) => `<li>${esc(w)}</li>`).join("");
   ul.hidden = !state.warns.size;
   const n = state.uploads.size + state.footer.length;
-  $("#img-count").textContent = n ? `${n} cargada${n === 1 ? "" : "s"}` : "";
+  $("#img-count").textContent = n ? `${n} added` : "";
 }
 
 async function renderModels() {
@@ -659,10 +659,10 @@ function downloadsNs() {
 async function saveFile(filename, blob) {
   const ns = await downloadsNs();
   if (ns) {
-    try { await ns.save({ filename, data: blob }); toast(`Guardado: ${filename}`); }
+    try { await ns.save({ filename, data: blob }); toast(`Saved: ${filename}`); }
     catch (e) {
       if (e && e.code === "declined") return;
-      toast(e && e.code === "rate_limited" ? "Ya hay una descarga esperando confirmación." : "No se pudo guardar el archivo en esta vista.");
+      toast(e && e.code === "rate_limited" ? "Another download is waiting for confirmation." : "Saving files isn't available in this view.");
     }
     return;
   }
@@ -674,7 +674,7 @@ async function saveFile(filename, blob) {
 async function downloadOne(page, btn) {
   btn.disabled = true; const t = btn.textContent; btn.textContent = "…";
   try { await saveFile(fileName(page) + ".png", await toBlob(page)); }
-  catch (e) { console.error(e); toast("No pude generar la imagen. Si usás fotos por link, probá subirlas."); }
+  catch (e) { console.error(e); toast("Couldn't create the image. If you use photo links, try uploading the photos instead."); }
   finally { btn.disabled = false; btn.textContent = t; }
 }
 async function downloadAll() {
@@ -682,14 +682,14 @@ async function downloadAll() {
   try {
     const zip = new JSZip();
     for (let i = 0; i < pages.length; i++) {
-      btn.textContent = `Generando ${i + 1}/${pages.length}…`;
+      btn.textContent = `Rendering ${i + 1}/${pages.length}…`;
       zip.file(fileName(pages[i]) + ".png", await toBlob(pages[i]));
     }
-    btn.textContent = "Comprimiendo…";
+    btn.textContent = "Zipping…";
     const blob = await zip.generateAsync({ type: "blob" });
     await saveFile(`rsg-flyers_${state.year}_${state.theme}-${state.palette}_${state.format}.zip`, blob);
-  } catch (e) { console.error(e); toast("No pude generar el ZIP. Si usás fotos por link, probá subirlas."); }
-  finally { btn.disabled = false; btn.textContent = "Descargar todos (ZIP)"; }
+  } catch (e) { console.error(e); toast("Couldn't create the ZIP. If you use photo links, try uploading the photos instead."); }
+  finally { btn.disabled = false; btn.textContent = "Download all (ZIP)"; }
 }
 
 let toastTimer;
@@ -736,17 +736,17 @@ function init() {
     try {
       const m = parseTable($("#paste-members").value), r = $("#paste-rsgs").value.trim() ? parseTable($("#paste-rsgs").value) : [];
       setData(m, r);
-      status("ok", `Datos cargados: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG.`);
-    } catch (e) { status("err", e.message.startsWith("No encontré") ? e.message : "No pude leer la tabla. Copiala con los encabezados incluidos."); }
+      status("ok", `Data loaded: ${state.members.length} people in ${Object.keys(state.rsgs).length} RSG${Object.keys(state.rsgs).length === 1 ? "" : "s"}.`);
+    } catch (e) { status("err", e.message.startsWith("No rows") ? e.message : "Couldn't read that table. Copy it including the header row."); }
   });
   $("#tpl-xlsx").addEventListener("click", () => {
-    if (window.XLSX) saveFile("rsg-flyers-plantilla.xlsx", templateXlsx());
+    if (window.XLSX) saveFile("rsg-flyers-template.xlsx", templateXlsx());
     else saveFile("members.csv", new Blob([DEMO_MEMBERS + "\n"], { type: "text/csv" }));
   });
   const tableIn = $("#file-table"), tableZone = $("#drop-table");
   const takeTables = async (files) => {
     if (!files.length) return;
-    try { await loadTableFiles([...files]); } catch (e) { status("err", e.message || "No pude leer ese archivo."); }
+    try { await loadTableFiles([...files]); } catch (e) { status("err", e.message || "Couldn't read that file."); }
   };
   tableIn.addEventListener("change", async () => { await takeTables(tableIn.files); tableIn.value = ""; });
   ["dragenter", "dragover"].forEach((ev) => tableZone.addEventListener(ev, (e) => { e.preventDefault(); tableZone.classList.add("over"); }));
@@ -772,7 +772,7 @@ function init() {
     });
   });
 
-  wireDrop("#drop-photos", "#file-photos", async (files) => { files.forEach((f) => state.uploads.set(f.name.toLowerCase(), f.url)); toast(`${files.length} imagen${files.length === 1 ? "" : "es"} cargada${files.length === 1 ? "" : "s"}`); render(); });
+  wireDrop("#drop-photos", "#file-photos", async (files) => { files.forEach((f) => state.uploads.set(f.name.toLowerCase(), f.url)); toast(`${files.length} image${files.length === 1 ? "" : "s"} added`); render(); });
   wireDrop("#drop-footer", "#file-footer", async (files) => { state.footer = [...state.footer, ...files].sort((a, b) => a.name.localeCompare(b.name)); render(); });
   $("#dl-all").addEventListener("click", downloadAll);
   const palBox = $("#palettes");
