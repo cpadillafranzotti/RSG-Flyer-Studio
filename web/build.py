@@ -56,6 +56,17 @@ def backgrounds() -> dict:
     return {p.stem.replace("_bg", ""): p.read_text() for p in sorted((TPL / "themes").glob("*_bg.svg"))}
 
 
+def palettes() -> dict:
+    return {k: v for k, v in json.loads((TPL / "palettes.json").read_text()).items() if not k.startswith("_")}
+
+
+def footer_logos() -> list:
+    out = []
+    for f in sorted((ROOT / "assets" / "logos").glob("footer_*.png")):
+        out.append({"name": f.name, "url": "data:image/png;base64," + base64.b64encode(f.read_bytes()).decode()})
+    return out
+
+
 def main():
     src = (WEB / "app.html").read_text()
     themes = [p.stem for p in sorted((TPL / "themes").glob("*.css"))]
@@ -63,7 +74,9 @@ def main():
             .replace("/*__FONTS__*/", font_css())
             .replace("/*__FLYER_CSS__*/", flyer_css())
             .replace("/*__BGS__*/{}", json.dumps(backgrounds()))
-            .replace("/*__THEMES__*/[]", json.dumps(themes)))
+            .replace("/*__THEMES__*/[]", json.dumps(themes))
+            .replace("/*__PALETTES__*/{}", json.dumps(palettes()))
+            .replace("/*__FOOTER__*/[]", json.dumps(footer_logos())))
     (WEB / "index.html").write_text(html)
     print(f"web/index.html  {len(html)/1024:.0f} KB  themes: {', '.join(themes)}")
 

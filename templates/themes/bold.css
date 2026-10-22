@@ -1,18 +1,16 @@
-/* "bold" — saturated accent field, flag stripe, big white type */
-.theme-bold .flyer { background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 85%, #000) 0%, color-mix(in srgb, var(--accent) 45%, #0a0a14) 100%); color: #ffffff; }
-.theme-bold .flyer::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 18px; z-index: 2;
-  background: linear-gradient(to bottom, var(--flag1) 0 33.3%, var(--flag2) 33.3% 66.6%, var(--flag3) 66.6%); }
+/* "bold" — solid brand-colour field, big white type */
+.theme-bold .flyer { background: linear-gradient(160deg, var(--deep) 0%, color-mix(in srgb, var(--deep) 55%, #050a14) 100%); color: #ffffff; }
 .theme-bold .year { font-size: 150px; font-weight: 700; letter-spacing: -0.02em; }
 .theme-bold .subtitle { font-weight: 600; text-transform: uppercase; letter-spacing: 0.22em; font-size: 28px; opacity: .85; }
 .theme-bold.many .year { font-size: 120px; }
 .theme-bold .rsg-name { font-size: 64px; margin-top: 34px; font-weight: 700; }
-.theme-bold .rsg-prefix { opacity: .7; }
+.theme-bold .rsg-prefix { color: var(--accent); }
 .theme-bold .website { opacity: .85; font-size: 26px; }
 .theme-bold .logo-wrap { padding: 12px; border-radius: 50%; background: rgba(255,255,255,.25); }
 .theme-bold .logo { background: #ffffff; color: #111; }
 .theme-bold .ring { padding: calc(var(--photo) * 0.04); background: #ffffff; }
-.theme-bold .initials { background: color-mix(in srgb, var(--accent) 25%, #ffffff); color: #111; }
-.theme-bold .role { text-transform: uppercase; letter-spacing: 0.1em; font-size: calc(10px + var(--photo) * 0.05); }
+.theme-bold .initials { background: color-mix(in srgb, var(--accent) 22%, #ffffff); color: #0b1626; }
+.theme-bold .role { color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; font-size: calc(10px + var(--photo) * 0.05); }
 .theme-bold .name { opacity: .92; }
 .theme-bold .handle, .theme-bold .email { font-style: normal; }
 

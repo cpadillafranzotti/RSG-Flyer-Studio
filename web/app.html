@@ -93,6 +93,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--chip); color: var(--muted); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.chip .sw { display: inline-flex; margin-right: 6px; vertical-align: -2px; border-radius: 999px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+.chip .sw i { width: 9px; height: 14px; display: block; }
 .chip .n { opacity: .65; font-variant-numeric: tabular-nums; margin-left: 4px; }
 
 .models { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -200,6 +202,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
       <section class="box" aria-labelledby="h-model">
         <h2 id="h-model"><span><span class="step">3</span> · Modelo y formato</span></h2>
         <div id="models" class="models"></div>
+        <div class="field" style="display:grid;gap:6px;font-size:13px;font-weight:600">Colores
+          <div id="palettes" class="chips"></div>
+        </div>
         <div id="formats" class="seg" role="group" aria-label="Formato">
           <button type="button" data-f="square" aria-pressed="true">Cuadrado<small>1080×1080</small></button>
           <button type="button" data-f="portrait" aria-pressed="false">Vertical<small>1080×1350</small></button>
@@ -215,7 +220,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
         </div>
         <div class="drop" id="drop-footer">
           <input id="file-footer" type="file" accept="image/*" multiple aria-label="Subir logos del pie">
-          <b>Logos del pie</b> (ISCB, Student Council…)<br>Se ubican abajo a la derecha, en orden de nombre
+          <b>Logos del pie</b>: ya incluye ISCB-SC e ISCB<br>Subí versiones oficiales para reemplazarlos (orden por nombre de archivo)
         </div>
         <ul id="warns" class="warns" hidden></ul>
       </section>
@@ -242,6 +247,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 "use strict";
 const BGS = /*__BGS__*/{};
 const THEMES = /*__THEMES__*/[];
+const PALETTES = /*__PALETTES__*/{};
+const DEFAULT_FOOTER = /*__FOOTER__*/[];
 const THEME_LABEL = { hex: "Hex", clean: "Clean", bold: "Bold" };
 const FORMATS = { square: [1080, 1080], portrait: [1080, 1350], story: [1080, 1920] };
 const TITLES = ["dr.", "dra.", "prof.", "profa.", "mr.", "ms.", "mrs.", "lic.", "ing."];
@@ -276,6 +283,7 @@ const state = {
   members: [], rsgs: {}, year: null, selected: new Set(), allRsgs: [],
   theme: store.get("theme", THEMES[0] || "hex"),
   format: store.get("format", "square"),
+  palette: store.get("palette", "sc-teal"),
   title: store.get("title", "Leadership team"),
   uploads: new Map(),      // lower-case file name -> dataURL
   footer: [],              // [{name, url}]
@@ -284,6 +292,7 @@ const state = {
 };
 if (!THEMES.includes(state.theme)) state.theme = THEMES[0];
 if (!FORMATS[state.format]) state.format = "square";
+if (!PALETTES[state.palette]) state.palette = Object.keys(PALETTES)[0];
 
 // ------------------------------------------------------------------ parsing
 function normKey(k) {
@@ -425,6 +434,16 @@ async function resolveImage(value, who) {
   return null;
 }
 
+function shade(hex, f) {
+  const h = hex.replace("#", ""); const t = f > 0 ? 255 : 0; f = Math.abs(f);
+  return "#" + [0, 2, 4].map((i) => { const c = parseInt(h.slice(i, i + 2), 16); return Math.round(c + (t - c) * f).toString(16).padStart(2, "0"); }).join("");
+}
+function paletteFor(name, rsg) {
+  const p = { ...PALETTES[name] };
+  if (name === "rsg") { const a = /^#[0-9a-f]{6}$/i.test(rsg.accent) ? rsg.accent : "#22c3d6"; Object.assign(p, { accent: a, ink: shade(a, -0.25), deep: shade(a, -0.45) }); }
+  return p;
+}
+
 // ------------------------------------------------------------------ layout + markup
 function layoutFor(n, fmt) {
   if (fmt === "story") {
@@ -443,11 +462,12 @@ function layoutFor(n, fmt) {
   return { cols, photo };
 }
 
-function flyerHTML({ year, title, rsg, team, theme, fmt, logo, footer }) {
+function flyerHTML({ year, title, rsg, team, theme, fmt, logo, footer, palette }) {
   const [w, h] = FORMATS[fmt];
   const L = layoutFor(team.length, fmt);
   const many = team.length > 4 ? " many" : "";
-  const vars = `--W:${w}px;--H:${h}px;--accent:${rsg.accent};--flag1:${rsg.flag[0]};--flag2:${rsg.flag[1]};--flag3:${rsg.flag[2]};--photo:${L.photo}px;--cols:${L.cols};width:${w}px;height:${h}px`;
+  const P = paletteFor(palette || state.palette, rsg);
+  const vars = `--W:${w}px;--H:${h}px;--accent:${P.accent};--ink:${P.ink};--deep:${P.deep};--band:${P.band};--flag1:${rsg.flag[0]};--flag2:${rsg.flag[1]};--flag3:${rsg.flag[2]};--photo:${L.photo}px;--cols:${L.cols};width:${w}px;height:${h}px`;
   const dn = rsg.display_name;
   const name = dn.startsWith("RSG-")
     ? `<span class="rsg-prefix">RSG-</span><span class="rsg-country">${esc(dn.slice(4))}</span>`
@@ -513,7 +533,7 @@ async function render() {
   const slugs = state.allRsgs.filter((s) => state.selected.has(s));
   const [w, h] = FORMATS[state.format];
   pages.length = 0;
-  const footer = state.footer;
+  const footer = state.footer.length ? state.footer : DEFAULT_FOOTER;
   const cards = [];
   for (const slug of slugs) {
     const rsg = state.rsgs[slug];
@@ -531,7 +551,7 @@ async function render() {
     const card = document.createElement("article");
     card.className = "card";
     card.innerHTML = `<div class="stage">${c.html}</div>
-      <footer><div class="meta"><b>${esc(c.rsg.display_name)}</b><span>${c.team.length} ${c.team.length === 1 ? "persona" : "personas"} · ${esc(THEME_LABEL[state.theme] || state.theme)}</span></div>
+      <footer><div class="meta"><b>${esc(c.rsg.display_name)}</b><span>${c.team.length} ${c.team.length === 1 ? "persona" : "personas"} · ${esc(THEME_LABEL[state.theme] || state.theme)} · ${esc(PALETTES[state.palette].label)}</span></div>
       <button class="btn small" type="button">PNG</button></footer>`;
     grid.appendChild(card);
     const stage = card.querySelector(".stage");
@@ -562,7 +582,7 @@ async function renderModels() {
   const rsg = state.rsgs[slug];
   const team = await teamFor(state.year, slug);
   box.innerHTML = THEMES.map((t) => `<button class="model" type="button" data-t="${t}" aria-pressed="${t === state.theme}">
-      <div class="mini">${flyerHTML({ year: state.year, title: state.title, rsg, team, theme: t, fmt: "square", logo: null, footer: [] })}</div>${esc(THEME_LABEL[t] || t)}</button>`).join("");
+      <div class="mini">${flyerHTML({ year: state.year, title: state.title, rsg, team, theme: t, fmt: "square", logo: null, footer: DEFAULT_FOOTER })}</div>${esc(THEME_LABEL[t] || t)}</button>`).join("");
   box.querySelectorAll(".mini").forEach((m) => {
     const fl = m.firstElementChild;
     fl.style.position = "absolute"; fl.style.transformOrigin = "0 0";
@@ -583,7 +603,7 @@ async function toBlob(page) {
     style: { transform: "none", position: "relative", left: "0", top: "0" },
   });
 }
-function fileName(page) { return `${page.slug}_${state.year}_${state.theme}_${state.format}`; }
+function fileName(page) { return `${page.slug}_${state.year}_${state.theme}-${state.palette}_${state.format}`; }
 
 let dlNs;
 function downloadsNs() {
@@ -622,7 +642,7 @@ async function downloadAll() {
     }
     btn.textContent = "Comprimiendo…";
     const blob = await zip.generateAsync({ type: "blob" });
-    await saveFile(`rsg-flyers_${state.year}_${state.theme}_${state.format}.zip`, blob);
+    await saveFile(`rsg-flyers_${state.year}_${state.theme}-${state.palette}_${state.format}.zip`, blob);
   } catch (e) { console.error(e); toast("No pude generar el ZIP. Si usás fotos por link, probá subirlas."); }
   finally { btn.disabled = false; btn.textContent = "Descargar todos (ZIP)"; }
 }
@@ -699,6 +719,18 @@ function init() {
   wireDrop("#drop-photos", "#file-photos", async (files) => { files.forEach((f) => state.uploads.set(f.name.toLowerCase(), f.url)); toast(`${files.length} imagen${files.length === 1 ? "" : "es"} cargada${files.length === 1 ? "" : "s"}`); render(); });
   wireDrop("#drop-footer", "#file-footer", async (files) => { state.footer = [...state.footer, ...files].sort((a, b) => a.name.localeCompare(b.name)); render(); });
   $("#dl-all").addEventListener("click", downloadAll);
+  const palBox = $("#palettes");
+  palBox.innerHTML = Object.entries(PALETTES).map(([k, p]) => {
+    const sw = k === "rsg"
+      ? `<span class="sw"><i style="background:#74acdf"></i><i style="background:#1f9d55"></i><i style="background:#d91023"></i></span>`
+      : `<span class="sw"><i style="background:${p.deep}"></i><i style="background:${p.accent}"></i><i style="background:${p.band}"></i></span>`;
+    return `<button class="chip" type="button" data-p="${k}" aria-pressed="${k === state.palette}">${sw}${esc(p.label)}</button>`;
+  }).join("");
+  palBox.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+    state.palette = c.dataset.p; store.set("palette", state.palette);
+    palBox.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === c));
+    render();
+  }));
 
   setData(parseTable(DEMO_MEMBERS), parseTable(DEMO_RSGS));
   const saved = store.get("sheet", "");

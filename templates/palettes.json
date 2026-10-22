@@ -1,0 +1,8 @@
+{
+  "_comment": "Brand palettes shared by generate.py and the web app. accent = on dark backgrounds, ink = accent on light backgrounds, deep = solid background (bold theme), band = footer band behind the logos. 'rsg' uses each RSG's own accent from the rsgs sheet.",
+  "sc-teal":  { "label": "Teal SC",       "accent": "#22c3d6", "ink": "#0a7f93", "deep": "#0b4f6c", "band": "#0b1626" },
+  "sc-ocean": { "label": "Azul SC",       "accent": "#7fd3f7", "ink": "#006c90", "deep": "#006c90", "band": "#071a2b" },
+  "sc-night": { "label": "Noche SC",      "accent": "#b4e4fc", "ink": "#1d4f7a", "deep": "#132c4a", "band": "#0a1422" },
+  "iscb-red": { "label": "Rojo ISCB",     "accent": "#ff5a63", "ink": "#d0131e", "deep": "#a3121b", "band": "#14111a" },
+  "rsg":      { "label": "Color del RSG", "accent": null,      "ink": null,      "deep": null,      "band": "#0b1626" }
+}

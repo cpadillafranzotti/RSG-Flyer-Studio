@@ -113,9 +113,23 @@ También corre solo cada vez que se pushea un cambio en `data/`, `templates/` o 
 `--scale 2` (default) exporta al doble de resolución (2160 px de ancho).
 El layout se adapta automáticamente a equipos de 1 a 8 personas (ver `data/examples/stress_test_members.csv`).
 
+## Colores (paletas de marca)
+
+Por defecto todos los RSG usan la misma paleta institucional, sacada del logo del ISCB Student Council, para que los flyers se vean como una serie:
+
+| paleta | uso |
+|---|---|
+| `sc-teal` *(default)* | teal del Student Council, igual al flyer 2025 |
+| `sc-ocean` | azul profundo del logo SC (`#006C90`) |
+| `sc-night` | azul noche con celeste del logo (`#B4E4FC`) |
+| `iscb-red` | rojo de la hélice ISCB (`#E41824`) |
+| `rsg` | color propio de cada RSG (columna `accent`), por si algún grupo lo pide |
+
+Se definen en `templates/palettes.json`. En el script: `--palette sc-ocean`. En la web: selector «Colores».
+
 ## Logos institucionales del footer
 
-Poné los archivos oficiales en `assets/logos/` con el prefijo `footer_` (por ejemplo `footer_1_iscbsc.png`, `footer_2_iscb.png`); se muestran en orden alfabético. Si no hay ninguno, se muestra el texto "ISCB Student Council".
+Todos los flyers llevan los logos de ISCB-SC e ISCB en la banda oscura del pie (`assets/logos/footer_1_iscbsc.png`, `footer_2_iscb.png`). Son recortes del flyer 2025, en versión para fondo oscuro: **reemplazalos por los archivos oficiales en alta resolución** (mismo nombre) y corré `python web/build.py`. Se muestran en orden alfabético.
 
 ## Agregar un tema nuevo
 

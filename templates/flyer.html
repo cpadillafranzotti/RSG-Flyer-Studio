@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
+  {{ font_css | safe }}
   :root {
     --W: {{ fmt.w }}px;
     --H: {{ fmt.h }}px;
-    --accent: {{ rsg.accent }};
+    --accent: {{ pal.accent }};
+    --ink: {{ pal.ink }};
+    --deep: {{ pal.deep }};
+    --band: {{ pal.band }};
     --flag1: {{ rsg.flag[0] }};
     --flag2: {{ rsg.flag[1] }};
     --flag3: {{ rsg.flag[2] }};

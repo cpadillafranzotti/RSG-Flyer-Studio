@@ -39,6 +39,7 @@ FORMATS = {
     "portrait": (1080, 1350),   # Instagram 4:5
     "story":    (1080, 1920),   # Stories / Reels cover
 }
+PALETTES = {k: v for k, v in json.loads((TEMPLATES / "palettes.json").read_text()).items() if not k.startswith("_")}
 TITLES = ("dr.", "dra.", "prof.", "profa.", "mr.", "ms.", "mrs.", "lic.", "ing.")
 
 
@@ -119,6 +120,35 @@ def load_rsgs(rows: list[dict]) -> dict[str, dict]:
     return rsgs
 
 
+def local_font_css() -> str:
+    """@font-face rules pointing at the bundled web/fonts files, so rendering never depends on Google Fonts."""
+    rules = []
+    for f in sorted((ROOT / "web" / "fonts").glob("*.woff2")):
+        m = re.match(r"(\w+)-(latin-ext|latin)-(\d+)-(normal|italic)\.woff2", f.name)
+        if m:
+            fam, _, weight, style = m.groups()
+            rules.append(f"@font-face{{font-family:'{fam.title()}';font-style:{style};font-weight:{weight};"
+                         f"src:url('{f.resolve().as_uri()}') format('woff2')}}")
+    return "\n".join(rules)
+
+
+def shade(hex_color: str, f: float) -> str:
+    """Mix a colour toward black (f<0) or white (f>0)."""
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    t = 255 if f > 0 else 0
+    f = abs(f)
+    return "#%02x%02x%02x" % tuple(round(c + (t - c) * f) for c in (r, g, b))
+
+
+def palette_for(name: str, rsg: dict) -> dict:
+    p = dict(PALETTES[name])
+    if name == "rsg":
+        a = rsg["accent"]
+        p.update(accent=a, ink=shade(a, -0.25), deep=shade(a, -0.45))
+    return p
+
+
 # ---------------------------------------------------------------- layout
 def layout_for(n: int, fmt: str) -> dict:
     """Photo diameter and columns so 1–8 members always fit nicely."""
@@ -144,7 +174,9 @@ def layout_for(n: int, fmt: str) -> dict:
 
 
 # ---------------------------------------------------------------- rendering
-def build_pages(members, rsgs, years, only_rsgs, themes, formats, title, footer_logos):
+def build_pages(members, rsgs, years, only_rsgs, themes, formats, title, footer_logos, palette):
+    global FONT_CSS
+    FONT_CSS = local_font_css()
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=select_autoescape(["html"]))
     tpl = env.get_template("flyer.html")
 
@@ -174,8 +206,9 @@ def build_pages(members, rsgs, years, only_rsgs, themes, formats, title, footer_
                 w, h = FORMATS[fmt]
                 page_html = tpl.render(
                     year=year, title=title, rsg=rsgs[slug], members=team, theme=theme,
+                    pal=palette_for(palette, rsgs[slug]),
                     fmt={"name": fmt, "w": w, "h": h}, layout=layout_for(len(team), fmt),
-                    footer_logos=footer_logos,
+                    footer_logos=footer_logos, font_css=FONT_CSS,
                 )
                 pages.append({"year": year, "rsg": slug, "theme": theme, "format": fmt,
                               "w": w, "h": h, "html": page_html,
@@ -238,6 +271,8 @@ def main():
     ap.add_argument("--theme", default="all", help=f"Theme(s): {', '.join(THEMES)} or all")
     ap.add_argument("--format", default="square", help=f"Format(s): {', '.join(FORMATS)} or all")
     ap.add_argument("--title", default="Leadership team")
+    ap.add_argument("--palette", default="sc-teal",
+                    help=f"Colour palette: {', '.join(PALETTES)} ('rsg' = each RSG's own accent)")
     ap.add_argument("--scale", type=float, default=2, help="Pixel density (2 = 2160px wide, crisp on phones)")
     ap.add_argument("--out", default="output")
     ap.add_argument("--keep-html", action="store_true", help="Keep the intermediate HTML for debugging")
@@ -260,7 +295,9 @@ def main():
     footer_logos = [p.resolve().as_uri() for p in sorted((ASSETS / "logos").glob("footer_*.*"))]
     only = set(a.rsg.lower().split(",")) if a.rsg else None
 
-    pages = build_pages(members, rsgs, years, only, themes, formats, a.title, footer_logos)
+    if a.palette not in PALETTES:
+        sys.exit(f"Unknown palette '{a.palette}'. Available: {', '.join(PALETTES)}")
+    pages = build_pages(members, rsgs, years, only, themes, formats, a.title, footer_logos, a.palette)
     if not pages:
         sys.exit("Nothing to render — check --year / --rsg filters.")
     print(f"Rendering {len(pages)} flyer(s) for {', '.join(sorted(years))} …")

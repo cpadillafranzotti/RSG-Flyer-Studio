@@ -7,6 +7,6 @@
 .theme-hex .logo { background: #ffffff; color: #111; }
 .theme-hex .ring { background: linear-gradient(135deg, #5d6b78 0%, #2a4155 45%, #0b2a52 100%); }
 .theme-hex .initials { background: #e8eef3; color: #0c1220; }
-.theme-hex .handle, .theme-hex .email { color: #ffffff; }
 .theme-hex .handle::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); margin-right: 14px; vertical-align: middle; }
 .theme-hex .partner-text { color: var(--accent); }
+.theme-hex .foot { border-top: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }

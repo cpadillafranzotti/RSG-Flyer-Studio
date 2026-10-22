@@ -1,16 +1,15 @@
-/* "clean" — light, editorial, accent from the RSG row */
+/* "clean" — light, editorial, accent from the palette */
 .theme-clean .flyer { background: #f6f4ef; color: #14181f; }
 .theme-clean .year { font-weight: 700; letter-spacing: 0.04em; }
 .theme-clean .subtitle { color: #5b6270; text-transform: uppercase; font-size: 30px; letter-spacing: 0.3em; }
 .theme-clean .rsg-name { font-weight: 700; }
-.theme-clean .rsg-prefix { color: var(--accent); }
+.theme-clean .rsg-prefix { color: var(--ink); }
 .theme-clean .website { color: #5b6270; }
 .theme-clean .logo-wrap { padding: 14px; border-radius: 50%; border: 3px solid #14181f; }
 .theme-clean .logo { background: #ffffff; color: #14181f; }
-.theme-clean .ring { padding: calc(var(--photo) * 0.035); background: var(--accent); }
+.theme-clean .ring { padding: calc(var(--photo) * 0.035); background: var(--ink); }
 .theme-clean .initials { background: #ffffff; color: #14181f; }
 .theme-clean .role { color: #14181f; text-transform: uppercase; letter-spacing: 0.12em; font-size: calc(10px + var(--photo) * 0.05); }
 .theme-clean .name { color: #3a404b; letter-spacing: 0.04em; }
-.theme-clean .foot { border-top: 2px solid #14181f; padding-top: 22px; }
 .theme-clean .handle, .theme-clean .email { font-style: normal; }
-.theme-clean .partner-text { color: #14181f; }
+.theme-clean .partner-text { color: #ffffff; }
