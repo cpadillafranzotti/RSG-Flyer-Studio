@@ -3,6 +3,22 @@
 Generador reproducible de flyers de "Leadership team" para los Regional Student Groups (RSG) del ISCB Student Council.
 Llenás una planilla (CSV o Google Sheet) con año, RSG, rol, nombre y foto. El script genera **todos los flyers al instante**: uno por RSG × tema × formato, en PNG listo para publicar.
 
+## La forma fácil: Flyer Studio (web)
+
+`web/index.html` es una app web estática que se publica sola en GitHub Pages (`.github/workflows/pages.yml`):
+
+1. Pegás el link del Google Sheet (compartido con *Cualquier persona con el enlace · Lector*).
+2. La página lee las pestañas `members` y `rsgs`.
+3. Elegís año, RSG, **modelo** (hex / clean / bold) y formato, y ves los flyers en vivo.
+4. Descargás cada PNG o todos juntos en un ZIP (2160 px).
+
+Si el sheet no se puede leer, también se puede copiar y pegar cada pestaña. Las fotos pueden ser links de Drive o archivos que se arrastran a la página (se emparejan por nombre de archivo).
+
+Activarlo: **Settings → Pages → Source: GitHub Actions**. La app queda en `https://<usuario>.github.io/<repo>/`.
+Los diseños salen de `templates/`: si editás un tema, `web/build.py` lo copia a la app (el workflow lo corre solo).
+
+## La forma por script (lotes / histórico)
+
 ```
 data/members.csv  ─┐
 data/rsgs.csv     ─┼─► generate.py ─► output/<año>/<rsg>_<año>_<tema>_<formato>.png
@@ -76,7 +92,7 @@ El workflow `.github/workflows/flyers.yml`:
 1. En el repo: **Settings → Secrets and variables → Actions → Variables** → crear `MEMBERS_SHEET_URL` y `RSGS_SHEET_URL` con los links de las pestañas.
 2. **Settings → Pages → Source: GitHub Actions**.
 3. **Actions → Generate RSG flyers → Run workflow** (elegís año / RSG / tema / formato).
-4. Al terminar: la galería queda publicada en GitHub Pages y los PNG también se pueden bajar como *artifact* del run.
+4. Al terminar, los PNG se bajan como *artifact* del run (GitHub Pages queda para la app web).
 
 También corre solo cada vez que se pushea un cambio en `data/`, `templates/` o `assets/`.
 

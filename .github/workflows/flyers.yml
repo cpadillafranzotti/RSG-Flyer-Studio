@@ -20,8 +20,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   build:
@@ -44,13 +42,3 @@ jobs:
           python generate.py $ARGS --theme "${{ inputs.theme || 'all' }}" --format "${{ inputs.format || 'all' }}"
       - uses: actions/upload-artifact@v4
         with: { name: rsg-flyers, path: output }
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: output }
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
-    steps:
-      - id: d
-        uses: actions/deploy-pages@v4

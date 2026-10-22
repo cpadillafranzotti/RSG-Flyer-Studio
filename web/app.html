@@ -1,0 +1,711 @@
+<title>RSG Flyer Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style id="font-faces">
+/*__FONTS__*/
+</style>
+<style>
+/* Layout: control rail on the left (stacks on phones), live flyer grid on the right. */
+:root {
+  --bg: #eef2f4;
+  --panel: #ffffff;
+  --ink: #0f1b2b;
+  --muted: #5a6878;
+  --line: #d6dee5;
+  --accent: #0e8fa3;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff2f5;
+  --warn: #9a5b00;
+  --warn-soft: #fff3dc;
+  --danger: #b4232f;
+  --chip: #f3f6f8;
+  --shadow: 0 1px 2px rgb(15 27 43 / .06), 0 8px 24px rgb(15 27 43 / .06);
+  --font-display: "Lexend", "Poppins", system-ui, sans-serif;
+  --font-ui: "Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b121c; --panel: #121c29; --ink: #e7eef5; --muted: #93a3b5; --line: #243245;
+    --accent: #2cc4d8; --accent-ink: #062027; --accent-soft: #10303a;
+    --warn: #f0b45a; --warn-soft: #2e2412; --danger: #ff7a85; --chip: #18263a;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b121c; --panel: #121c29; --ink: #e7eef5; --muted: #93a3b5; --line: #243245;
+  --accent: #2cc4d8; --accent-ink: #062027; --accent-soft: #10303a;
+  --warn: #f0b45a; --warn-soft: #2e2412; --danger: #ff7a85; --chip: #18263a;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .25);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
+.app {
+  max-width: 1440px; margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px;
+}
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+.top h1 { font-family: var(--font-display); font-weight: 600; font-size: 24px; letter-spacing: -.01em; margin: 0; }
+.top h1 span { color: var(--accent); }
+.top p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+.layout { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- control rail ---------- */
+.rail { display: grid; gap: 14px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .rail { position: static; } }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.box h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.box h2 .step { color: var(--accent); }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.hint code, .mono { font-family: var(--font-mono); font-size: 12px; background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+
+.tabs { display: flex; gap: 4px; background: var(--chip); padding: 4px; border-radius: 9px; }
+.tabs button { flex: 1; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); font-weight: 600; }
+
+label.field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+input[type="text"], input[type="url"], select, textarea {
+  font: inherit; font-size: 13px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0;
+}
+textarea { font-family: var(--font-mono); font-size: 12px; min-height: 92px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, .drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.btn { font: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:disabled { opacity: .5; cursor: progress; }
+.btn.small { padding: 6px 10px; font-size: 12px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row > * { flex: 1; }
+
+.status { font-size: 12.5px; border-radius: 8px; padding: 8px 10px; background: var(--chip); color: var(--muted); }
+.status.ok { background: var(--accent-soft); color: var(--ink); }
+.status.err { background: var(--warn-soft); color: var(--warn); }
+.status.demo { background: var(--warn-soft); color: var(--warn); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--chip); color: var(--muted); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.chip .n { opacity: .65; font-variant-numeric: tabular-nums; margin-left: 4px; }
+
+.models { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.model { border: 2px solid transparent; border-radius: 10px; padding: 0; background: none; cursor: pointer; display: grid; gap: 6px; font: inherit; font-size: 12px; color: var(--muted); text-align: center; padding-bottom: 6px; }
+.model .mini { aspect-ratio: 1; border-radius: 8px; overflow: hidden; position: relative; background: var(--chip); }
+.model[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); font-weight: 600; }
+
+.seg { display: flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.seg button { flex: 1; border: 0; border-right: 1px solid var(--line); background: var(--panel); color: var(--muted); font: inherit; font-size: 12.5px; padding: 8px 4px; cursor: pointer; display: grid; gap: 2px; justify-items: center; }
+.seg button:last-child { border-right: 0; }
+.seg button small { font-size: 10.5px; opacity: .8; font-variant-numeric: tabular-nums; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+
+.drop { border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; color: var(--muted); font-size: 12.5px; cursor: pointer; position: relative; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.drop b { color: var(--ink); }
+
+.warns { display: grid; gap: 4px; font-size: 12px; color: var(--warn); margin: 0; padding-left: 18px; }
+
+/* ---------- results ---------- */
+.results { display: grid; gap: 14px; min-width: 0; }
+.bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.bar .count { font-size: 13px; color: var(--muted); }
+.bar .count b { color: var(--ink); font-family: var(--font-display); font-size: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: grid; min-width: 0; }
+.stage { position: relative; overflow: hidden; background: #0c1220; }
+.stage > .fl { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform: scale(var(--s, .25)); }
+.card footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; }
+.card footer .meta { min-width: 0; }
+.card footer .meta b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card footer .meta span { font-size: 12px; color: var(--muted); }
+.empty { background: var(--panel); border: 1px dashed var(--line); border-radius: 12px; padding: 40px 20px; text-align: center; color: var(--muted); }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 10px; font-size: 13px; box-shadow: var(--shadow); z-index: 20; max-width: calc(100vw - 32px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .card { animation: rise .25s ease both; }
+  @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+}
+
+/* ================= flyer designs (generated from templates/) ================= */
+/*__FLYER_CSS__*/
+.fl { position: relative; overflow: hidden; }
+.fl .flyer { line-height: normal; }
+.fl h1 { margin: 0; }
+</style>
+
+<div class="app">
+  <header class="top">
+    <h1>RSG <span>Flyer Studio</span></h1>
+    <p>Pegá el link del Google Sheet del comité, elegí año y modelo, y descargá los flyers de liderazgo de cada RSG.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="rail">
+      <section class="box" aria-labelledby="h-data">
+        <h2 id="h-data"><span><span class="step">1</span> · Datos</span></h2>
+        <div class="tabs" role="tablist">
+          <button role="tab" id="tab-link" aria-selected="true" data-pane="pane-link">Link del sheet</button>
+          <button role="tab" id="tab-paste" aria-selected="false" data-pane="pane-paste">Pegar tabla</button>
+        </div>
+
+        <div id="pane-link" class="pane">
+          <label class="field">Google Sheet
+            <input id="sheet-url" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
+          </label>
+          <p class="hint">Compartido como <em>Cualquier persona con el enlace · Lector</em>, con pestañas <code>members</code> y <code>rsgs</code>.</p>
+          <button id="load-sheet" class="btn primary" type="button">Cargar sheet</button>
+        </div>
+
+        <div id="pane-paste" class="pane" hidden>
+          <label class="field">Pestaña <span class="mono">members</span>
+            <textarea id="paste-members" placeholder="Seleccioná toda la pestaña en el sheet (Ctrl+A), copiá y pegá acá"></textarea>
+          </label>
+          <label class="field">Pestaña <span class="mono">rsgs</span> <span class="hint" style="font-weight:400">(opcional)</span>
+            <textarea id="paste-rsgs" placeholder="rsg, display_name, country, website, logo, flag_colors, flag_layout, accent, handle, email"></textarea>
+          </label>
+          <button id="load-paste" class="btn primary" type="button">Usar estos datos</button>
+        </div>
+
+        <div id="data-status" class="status demo">Mostrando datos de ejemplo. Los nombres son inventados.</div>
+        <div class="row">
+          <button id="tpl-members" class="btn small" type="button">Plantilla members.csv</button>
+          <button id="tpl-rsgs" class="btn small" type="button">Plantilla rsgs.csv</button>
+        </div>
+      </section>
+
+      <section class="box" aria-labelledby="h-pick">
+        <h2 id="h-pick"><span><span class="step">2</span> · Qué generar</span></h2>
+        <label class="field">Año
+          <select id="year"></select>
+        </label>
+        <div class="field" style="display:grid;gap:6px;font-size:13px;font-weight:600">
+          <span style="display:flex;justify-content:space-between;align-items:center">RSG activos
+            <button id="toggle-all" class="chip" type="button" style="font-size:11.5px;padding:3px 9px">Todos</button></span>
+          <div id="rsg-chips" class="chips"></div>
+        </div>
+        <label class="field">Título
+          <input id="title" type="text" value="Leadership team">
+        </label>
+      </section>
+
+      <section class="box" aria-labelledby="h-model">
+        <h2 id="h-model"><span><span class="step">3</span> · Modelo y formato</span></h2>
+        <div id="models" class="models"></div>
+        <div id="formats" class="seg" role="group" aria-label="Formato">
+          <button type="button" data-f="square" aria-pressed="true">Cuadrado<small>1080×1080</small></button>
+          <button type="button" data-f="portrait" aria-pressed="false">Vertical<small>1080×1350</small></button>
+          <button type="button" data-f="story" aria-pressed="false">Story<small>1080×1920</small></button>
+        </div>
+      </section>
+
+      <section class="box" aria-labelledby="h-img">
+        <h2 id="h-img"><span><span class="step">4</span> · Fotos y logos</span><span id="img-count" class="hint" style="letter-spacing:0;text-transform:none"></span></h2>
+        <div class="drop" id="drop-photos">
+          <input id="file-photos" type="file" accept="image/*" multiple aria-label="Subir fotos y logos de RSG">
+          <b>Soltá fotos o logos acá</b><br>El nombre de archivo tiene que coincidir con la columna <span class="mono">photo</span> o <span class="mono">logo</span>
+        </div>
+        <div class="drop" id="drop-footer">
+          <input id="file-footer" type="file" accept="image/*" multiple aria-label="Subir logos del pie">
+          <b>Logos del pie</b> (ISCB, Student Council…)<br>Se ubican abajo a la derecha, en orden de nombre
+        </div>
+        <ul id="warns" class="warns" hidden></ul>
+      </section>
+    </aside>
+
+    <main class="results">
+      <div class="bar">
+        <div class="count" id="count"></div>
+        <div class="row" style="flex:0 1 auto">
+          <button id="dl-all" class="btn primary" type="button">Descargar todos (ZIP)</button>
+        </div>
+      </div>
+      <div id="grid" class="grid"></div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(() => {
+"use strict";
+const BGS = /*__BGS__*/{};
+const THEMES = /*__THEMES__*/[];
+const THEME_LABEL = { hex: "Hex", clean: "Clean", bold: "Bold" };
+const FORMATS = { square: [1080, 1080], portrait: [1080, 1350], story: [1080, 1920] };
+const TITLES = ["dr.", "dra.", "prof.", "profa.", "mr.", "ms.", "mrs.", "lic.", "ing."];
+const ALIASES = { "año": "year", ano: "year", "orden": "order", rol: "role", cargo: "role", nombre: "name", foto: "photo", pais: "country", "país": "country", color: "accent" };
+
+const DEMO_MEMBERS = `year,rsg,order,role,name,photo
+2026,nigeria,1,President,Ada Okonkwo-Bello,
+2026,nigeria,2,Secretary,Tunde Adeyemi,
+2026,nigeria,3,Faculty Advisor,Dr. Ngozi Eze,
+2026,argentina,1,President,Lucía Fernández,
+2026,argentina,2,Vice President,Martín Gómez Ruiz,
+2026,argentina,3,Secretary,Valentina Sosa,
+2026,argentina,4,Treasurer,Joaquín Díaz,
+2026,argentina,5,Communications,Camila Herrera,
+2026,peru,1,President,Diego Quispe Mamani,
+2026,peru,2,Faculty Advisor,Dra. Rosa Huamán,
+2027,argentina,1,President,Valentina Sosa,
+2027,argentina,2,Vice President,Camila Herrera,
+2027,argentina,3,Secretary,Tomás Paz,`;
+const DEMO_RSGS = `rsg,display_name,country,website,logo,flag_colors,flag_layout,accent,handle,email
+nigeria,RSG-Nigeria,Nigeria,rsg-nigeria.iscbsc.org,,#1f9d55|#ffffff|#1f9d55,vertical,#22c3d6,@iscbsc,rsg@iscbsc.org
+argentina,RSG-Argentina,Argentina,rsg-argentina.iscbsc.org,,#74acdf|#ffffff|#74acdf,horizontal,#74acdf,@iscbsc,rsg@iscbsc.org
+peru,RSG-Peru,Peru,rsg-peru.iscbsc.org,,#d91023|#ffffff|#d91023,vertical,#ff5a6b,@iscbsc,rsg@iscbsc.org`;
+
+const $ = (s) => document.querySelector(s);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("rsgfs:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("rsgfs:" + k, JSON.stringify(v)); } catch {} },
+};
+
+const state = {
+  members: [], rsgs: {}, year: null, selected: new Set(), allRsgs: [],
+  theme: store.get("theme", THEMES[0] || "hex"),
+  format: store.get("format", "square"),
+  title: store.get("title", "Leadership team"),
+  uploads: new Map(),      // lower-case file name -> dataURL
+  footer: [],              // [{name, url}]
+  remote: new Map(),       // url -> dataURL | null
+  warns: new Set(),
+};
+if (!THEMES.includes(state.theme)) state.theme = THEMES[0];
+if (!FORMATS[state.format]) state.format = "square";
+
+// ------------------------------------------------------------------ parsing
+function normKey(k) {
+  const s = String(k || "").trim().toLowerCase().normalize("NFC").replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "");
+  return ALIASES[s] || s;
+}
+function parseTable(text) {
+  const res = Papa.parse(text.trim(), { header: true, skipEmptyLines: "greedy", delimiter: "", transformHeader: normKey });
+  return res.data
+    .map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, String(v ?? "").trim()])))
+    .filter((r) => Object.values(r).some(Boolean));
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function initials(name) {
+  const w = name.split(/\s+/).filter((x) => x && !TITLES.includes(x.toLowerCase()));
+  if (!w.length) return "?";
+  return (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase();
+}
+function slugify(s) { return String(s || "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+function titleCase(s) { return s.replace(/(^|[-\s])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()); }
+
+function buildRsgs(rows) {
+  const out = {};
+  for (const r of rows) {
+    const slug = slugify(r.rsg);
+    if (!slug) continue;
+    const flag = (r.flag_colors || "").split("|").map((c) => c.trim()).filter(Boolean);
+    if (!flag.length) flag.push(r.accent || "#22c3d6");
+    while (flag.length < 3) flag.push(flag[flag.length - 1]);
+    out[slug] = {
+      slug,
+      display_name: r.display_name || "RSG-" + titleCase(slug.replace(/-/g, " ")),
+      country: r.country || titleCase(slug.replace(/-/g, " ")),
+      website: r.website || "",
+      logo: r.logo || "",
+      flag: flag.slice(0, 3),
+      flag_layout: /^h/i.test(r.flag_layout || "") ? "horizontal" : "vertical",
+      accent: r.accent || "#22c3d6",
+      handle: r.handle || "",
+      email: r.email || "",
+    };
+  }
+  return out;
+}
+
+function setData(memberRows, rsgRows) {
+  const members = memberRows
+    .map((r) => ({ ...r, rsg: slugify(r.rsg), year: String(r.year || "").trim() }))
+    .filter((r) => r.year && r.rsg && r.name);
+  if (!members.length) throw new Error("No encontré filas con year, rsg y name en la pestaña members.");
+  state.members = members;
+  state.rsgs = buildRsgs(rsgRows || []);
+  for (const m of members) if (!state.rsgs[m.rsg]) state.rsgs[m.rsg] = buildRsgs([{ rsg: m.rsg }])[m.rsg];
+  const years = [...new Set(members.map((m) => m.year))].sort();
+  const yearSel = $("#year");
+  yearSel.innerHTML = years.slice().reverse().map((y) => `<option>${esc(y)}</option>`).join("");
+  state.year = years[years.length - 1];
+  yearSel.value = state.year;
+  onYear();
+}
+
+// ------------------------------------------------------------------ Google Sheets
+function sheetId(url) { const m = String(url).match(/\/spreadsheets\/d\/([\w-]+)/); return m ? m[1] : null; }
+async function fetchTab(id, params) {
+  const q = new URLSearchParams({ tqx: "out:csv", headers: "1", ...params });
+  const res = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?${q}`);
+  if (!res.ok) throw new Error("http " + res.status);
+  const text = await res.text();
+  if (/^\s*</.test(text)) throw new Error("private");
+  return parseTable(text);
+}
+async function loadSheet() {
+  const url = $("#sheet-url").value.trim();
+  const id = sheetId(url);
+  const st = $("#data-status");
+  if (!id) { status("err", "Ese link no parece de Google Sheets. Tiene que contener /spreadsheets/d/…"); return; }
+  const btn = $("#load-sheet"); btn.disabled = true; status("", "Leyendo el sheet…");
+  try {
+    let members = await fetchTab(id, { sheet: "members" });
+    if (!members.length || !("year" in members[0] && "name" in members[0])) {
+      const gid = (url.match(/[#&?]gid=(\d+)/) || [])[1];
+      members = await fetchTab(id, gid ? { gid } : {});
+    }
+    let rsgs = [];
+    try {
+      rsgs = await fetchTab(id, { sheet: "rsgs" });
+      // gviz silently returns the first tab when a name is missing
+      if (!rsgs.length || !("rsg" in rsgs[0]) || "name" in rsgs[0]) rsgs = [];
+    } catch {}
+    setData(members, rsgs);
+    store.set("sheet", url);
+    status("ok", `Sheet cargado: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG${rsgs.length ? "" : " (sin pestaña rsgs: uso colores por defecto)"}.`);
+  } catch (e) {
+    const msg = e.message === "private"
+      ? "El sheet es privado. Compartilo como «Cualquier persona con el enlace · Lector» y probá de nuevo."
+      : e.message.startsWith("No encontré") ? e.message
+      : "No pude leer el sheet desde esta página. Revisá que esté compartido con el enlace, o copiá y pegá las pestañas acá.";
+    status("err", msg);
+    if (e.message !== "private" && !e.message.startsWith("No encontré")) document.getElementById("tab-paste").click();
+  } finally { btn.disabled = false; }
+}
+function status(kind, text) { const st = $("#data-status"); st.className = "status " + kind; st.textContent = text; }
+
+// ------------------------------------------------------------------ images
+function baseName(v) { return String(v).split(/[\\/]/).pop().toLowerCase(); }
+function driveUrl(v) {
+  const m = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:.*&)?id=|thumbnail\?(?:.*&)?id=)([\w-]+)/);
+  return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w1000` : null;
+}
+function blobToDataURL(blob) { return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(blob); }); }
+async function fetchImage(url) {
+  if (state.remote.has(url)) return state.remote.get(url);
+  const tries = [url, "https://images.weserv.nl/?url=" + encodeURIComponent(url) + "&w=1000"];
+  let out = null;
+  for (const u of tries) {
+    try {
+      const r = await fetch(u, { mode: "cors" });
+      if (!r.ok) continue;
+      const b = await r.blob();
+      if (!b.type.startsWith("image/")) continue;
+      out = await blobToDataURL(b); break;
+    } catch {}
+  }
+  state.remote.set(url, out);
+  return out;
+}
+async function resolveImage(value, who) {
+  if (!value) return null;
+  const up = state.uploads.get(baseName(value));
+  if (up) return up;
+  if (value.startsWith("data:")) return value;
+  const url = driveUrl(value) || (/^https?:\/\//.test(value) ? value : null);
+  if (url) {
+    const d = await fetchImage(url);
+    if (!d) state.warns.add(`${who}: no pude descargar la imagen. Subila en «Fotos y logos».`);
+    return d;
+  }
+  state.warns.add(`${who}: falta el archivo «${value}». Subilo en «Fotos y logos».`);
+  return null;
+}
+
+// ------------------------------------------------------------------ layout + markup
+function layoutFor(n, fmt) {
+  if (fmt === "story") {
+    if (n === 1) return { cols: 1, photo: 420 };
+    if (n <= 4) return { cols: 2, photo: 300 };
+    if (n <= 6) return { cols: 3, photo: 245 };
+    return { cols: 3, photo: 175 };
+  }
+  let cols, photo;
+  if (n <= 2) { cols = Math.max(n, 1); photo = 300; }
+  else if (n === 3) { cols = 3; photo = 255; }
+  else if (n === 4) { cols = 4; photo = 180; }
+  else if (n <= 6) { cols = 3; photo = 160; }
+  else { cols = 4; photo = 145; }
+  if (fmt === "portrait" && n > 4) photo += 25;
+  return { cols, photo };
+}
+
+function flyerHTML({ year, title, rsg, team, theme, fmt, logo, footer }) {
+  const [w, h] = FORMATS[fmt];
+  const L = layoutFor(team.length, fmt);
+  const many = team.length > 4 ? " many" : "";
+  const vars = `--W:${w}px;--H:${h}px;--accent:${rsg.accent};--flag1:${rsg.flag[0]};--flag2:${rsg.flag[1]};--flag3:${rsg.flag[2]};--photo:${L.photo}px;--cols:${L.cols};width:${w}px;height:${h}px`;
+  const dn = rsg.display_name;
+  const name = dn.startsWith("RSG-")
+    ? `<span class="rsg-prefix">RSG-</span><span class="rsg-country">${esc(dn.slice(4))}</span>`
+    : `<span class="rsg-country">${esc(dn)}</span>`;
+  const logoHTML = logo
+    ? `<img src="${logo}" alt="">`
+    : `<div class="logo-generated"><div class="logo-kicker">Regional Student Group</div><div class="logo-flag ${rsg.flag_layout}"><i></i><i></i><i></i></div><div class="logo-country">${esc(rsg.country)}</div></div>`;
+  const members = team.map((m) => `
+    <figure class="member"><div class="ring">${m.photo ? `<img class="photo" src="${m.photo}" alt="">` : `<div class="photo initials">${esc(m.initials)}</div>`}</div>
+    <figcaption><div class="role">${esc(m.role)}</div><div class="name">${esc(m.name)}</div></figcaption></figure>`).join("");
+  const partners = footer.length
+    ? footer.map((f) => `<img src="${f.url}" alt="">`).join("")
+    : `<span class="partner-text">ISCB Student Council</span>`;
+  return `<div class="fl theme-${theme} fmt-${fmt} n-${team.length}${many}" style="${vars}">
+  <main class="flyer">
+    <div class="bg" aria-hidden="true">${BGS[theme] || ""}</div>
+    <header class="head">
+      <div class="titles">
+        <div class="year">${esc(year)}</div>
+        <div class="subtitle">${esc(title)}</div>
+        <h1 class="rsg-name">${name}</h1>
+        ${rsg.website ? `<div class="website">${esc(rsg.website)}</div>` : ""}
+      </div>
+      <div class="logo-wrap"><div class="logo">${logoHTML}</div></div>
+    </header>
+    <section class="team">${members}</section>
+    <footer class="foot">
+      <div class="contact">
+        ${rsg.handle ? `<span class="handle">${esc(rsg.handle)}</span>` : ""}
+        ${rsg.email ? `<span class="email"><small>RSG committee</small>${esc(rsg.email)}</span>` : ""}
+      </div>
+      <div class="partners">${partners}</div>
+    </footer>
+  </main></div>`;
+}
+
+async function teamFor(year, slug) {
+  const rows = state.members.filter((m) => m.year === year && m.rsg === slug)
+    .sort((a, b) => (parseInt(a.order) || 999) - (parseInt(b.order) || 999));
+  return Promise.all(rows.map(async (r) => ({
+    role: r.role || "", name: r.name, initials: initials(r.name),
+    photo: await resolveImage(r.photo, r.name),
+  })));
+}
+
+// ------------------------------------------------------------------ rendering
+let renderToken = 0;
+const pages = [];      // [{slug, el, w, h}]
+
+function fitStage(stage) {
+  const [w, h] = FORMATS[state.format];
+  stage.style.aspectRatio = `${w} / ${h}`;
+  const s = stage.clientWidth / w;
+  stage.style.setProperty("--s", s);
+  const fl = stage.firstElementChild; if (fl) fl.style.setProperty("--s", s);
+}
+const ro = new ResizeObserver((entries) => entries.forEach((e) => fitStage(e.target)));
+
+async function render() {
+  const token = ++renderToken;
+  state.warns.clear();
+  const grid = $("#grid");
+  const slugs = state.allRsgs.filter((s) => state.selected.has(s));
+  const [w, h] = FORMATS[state.format];
+  pages.length = 0;
+  const footer = state.footer;
+  const cards = [];
+  for (const slug of slugs) {
+    const rsg = state.rsgs[slug];
+    const [team, logo] = await Promise.all([teamFor(state.year, slug), resolveImage(rsg.logo, rsg.display_name + " (logo)")]);
+    if (token !== renderToken) return;
+    const html = flyerHTML({ year: state.year, title: state.title, rsg, team, theme: state.theme, fmt: state.format, logo, footer });
+    cards.push({ slug, rsg, team, html });
+  }
+  grid.innerHTML = "";
+  ro.disconnect();
+  if (!cards.length) {
+    grid.innerHTML = `<div class="empty">Elegí al menos un RSG para ver sus flyers.</div>`;
+  }
+  for (const c of cards) {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML = `<div class="stage">${c.html}</div>
+      <footer><div class="meta"><b>${esc(c.rsg.display_name)}</b><span>${c.team.length} ${c.team.length === 1 ? "persona" : "personas"} · ${esc(THEME_LABEL[state.theme] || state.theme)}</span></div>
+      <button class="btn small" type="button">PNG</button></footer>`;
+    grid.appendChild(card);
+    const stage = card.querySelector(".stage");
+    fitStage(stage); ro.observe(stage);
+    const el = stage.firstElementChild;
+    const page = { slug: c.slug, el, w, h };
+    pages.push(page);
+    card.querySelector("button").addEventListener("click", (ev) => downloadOne(page, ev.currentTarget));
+  }
+  $("#count").innerHTML = `<b>${cards.length}</b> ${cards.length === 1 ? "flyer" : "flyers"} · ${esc(state.year)} · ${w}×${h}`;
+  $("#dl-all").disabled = !cards.length;
+  renderWarnings();
+  renderModels();
+}
+
+function renderWarnings() {
+  const ul = $("#warns");
+  ul.innerHTML = [...state.warns].map((w) => `<li>${esc(w)}</li>`).join("");
+  ul.hidden = !state.warns.size;
+  const n = state.uploads.size + state.footer.length;
+  $("#img-count").textContent = n ? `${n} cargada${n === 1 ? "" : "s"}` : "";
+}
+
+async function renderModels() {
+  const box = $("#models");
+  const slug = state.allRsgs.find((s) => state.selected.has(s)) || state.allRsgs[0];
+  if (!slug) { box.innerHTML = ""; return; }
+  const rsg = state.rsgs[slug];
+  const team = await teamFor(state.year, slug);
+  box.innerHTML = THEMES.map((t) => `<button class="model" type="button" data-t="${t}" aria-pressed="${t === state.theme}">
+      <div class="mini">${flyerHTML({ year: state.year, title: state.title, rsg, team, theme: t, fmt: "square", logo: null, footer: [] })}</div>${esc(THEME_LABEL[t] || t)}</button>`).join("");
+  box.querySelectorAll(".mini").forEach((m) => {
+    const fl = m.firstElementChild;
+    fl.style.position = "absolute"; fl.style.transformOrigin = "0 0";
+    const fit = () => { fl.style.transform = `scale(${m.clientWidth / 1080})`; };
+    fit(); new ResizeObserver(fit).observe(m);
+  });
+  box.querySelectorAll(".model").forEach((b) => b.addEventListener("click", () => {
+    state.theme = b.dataset.t; store.set("theme", state.theme); render();
+  }));
+}
+
+// ------------------------------------------------------------------ export
+const fontCSS = () => document.getElementById("font-faces").textContent;
+async function toBlob(page) {
+  await document.fonts.ready;
+  return htmlToImage.toBlob(page.el, {
+    width: page.w, height: page.h, pixelRatio: 2, fontEmbedCSS: fontCSS(),
+    style: { transform: "none", position: "relative", left: "0", top: "0" },
+  });
+}
+function fileName(page) { return `${page.slug}_${state.year}_${state.theme}_${state.format}`; }
+
+let dlNs;
+function downloadsNs() {
+  if (dlNs !== undefined) return dlNs;
+  dlNs = window.claude && typeof window.claude.use === "function" ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+  return dlNs;
+}
+async function saveFile(filename, blob) {
+  const ns = await downloadsNs();
+  if (ns) {
+    try { await ns.save({ filename, data: blob }); toast(`Guardado: ${filename}`); }
+    catch (e) {
+      if (e && e.code === "declined") return;
+      toast(e && e.code === "rate_limited" ? "Ya hay una descarga esperando confirmación." : "No se pudo guardar el archivo en esta vista.");
+    }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function downloadOne(page, btn) {
+  btn.disabled = true; const t = btn.textContent; btn.textContent = "…";
+  try { await saveFile(fileName(page) + ".png", await toBlob(page)); }
+  catch (e) { console.error(e); toast("No pude generar la imagen. Si usás fotos por link, probá subirlas."); }
+  finally { btn.disabled = false; btn.textContent = t; }
+}
+async function downloadAll() {
+  const btn = $("#dl-all"); btn.disabled = true;
+  try {
+    const zip = new JSZip();
+    for (let i = 0; i < pages.length; i++) {
+      btn.textContent = `Generando ${i + 1}/${pages.length}…`;
+      zip.file(fileName(pages[i]) + ".png", await toBlob(pages[i]));
+    }
+    btn.textContent = "Comprimiendo…";
+    const blob = await zip.generateAsync({ type: "blob" });
+    await saveFile(`rsg-flyers_${state.year}_${state.theme}_${state.format}.zip`, blob);
+  } catch (e) { console.error(e); toast("No pude generar el ZIP. Si usás fotos por link, probá subirlas."); }
+  finally { btn.disabled = false; btn.textContent = "Descargar todos (ZIP)"; }
+}
+
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3200); }
+
+// ------------------------------------------------------------------ controls
+function onYear() {
+  state.year = $("#year").value;
+  const counts = {};
+  state.members.filter((m) => m.year === state.year).forEach((m) => (counts[m.rsg] = (counts[m.rsg] || 0) + 1));
+  state.allRsgs = Object.keys(counts).sort((a, b) => state.rsgs[a].display_name.localeCompare(state.rsgs[b].display_name));
+  state.selected = new Set(state.allRsgs);
+  $("#rsg-chips").innerHTML = state.allRsgs.map((s) =>
+    `<button class="chip" type="button" data-s="${s}" aria-pressed="true">${esc(state.rsgs[s].display_name.replace(/^RSG-/, ""))}<span class="n">${counts[s]}</span></button>`).join("");
+  $("#rsg-chips").querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+    const s = c.dataset.s;
+    state.selected.has(s) ? state.selected.delete(s) : state.selected.add(s);
+    c.setAttribute("aria-pressed", state.selected.has(s));
+    render();
+  }));
+  render();
+}
+
+function readFiles(files) {
+  return Promise.all([...files].filter((f) => f.type.startsWith("image/")).map(async (f) => ({ name: f.name, url: await blobToDataURL(f) })));
+}
+function wireDrop(zoneId, inputId, onFiles) {
+  const zone = $(zoneId), input = $(inputId);
+  input.addEventListener("change", async () => { await onFiles(await readFiles(input.files)); input.value = ""; });
+  ["dragenter", "dragover"].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => zone.addEventListener(ev, () => zone.classList.remove("over")));
+  zone.addEventListener("drop", async (e) => { e.preventDefault(); await onFiles(await readFiles(e.dataTransfer.files)); });
+}
+
+function init() {
+  // tabs
+  document.querySelectorAll('[role="tab"]').forEach((t) => t.addEventListener("click", () => {
+    document.querySelectorAll('[role="tab"]').forEach((x) => { x.setAttribute("aria-selected", x === t); $("#" + x.dataset.pane).hidden = x !== t; });
+  }));
+  $("#sheet-url").value = store.get("sheet", "");
+  $("#load-sheet").addEventListener("click", loadSheet);
+  $("#sheet-url").addEventListener("keydown", (e) => { if (e.key === "Enter") loadSheet(); });
+  $("#load-paste").addEventListener("click", () => {
+    try {
+      const m = parseTable($("#paste-members").value), r = $("#paste-rsgs").value.trim() ? parseTable($("#paste-rsgs").value) : [];
+      setData(m, r);
+      status("ok", `Datos cargados: ${state.members.length} personas en ${Object.keys(state.rsgs).length} RSG.`);
+    } catch (e) { status("err", e.message.startsWith("No encontré") ? e.message : "No pude leer la tabla. Copiala con los encabezados incluidos."); }
+  });
+  $("#tpl-members").addEventListener("click", () => saveFile("members.csv", new Blob([DEMO_MEMBERS + "\n"], { type: "text/csv" })));
+  $("#tpl-rsgs").addEventListener("click", () => saveFile("rsgs.csv", new Blob([DEMO_RSGS + "\n"], { type: "text/csv" })));
+
+  $("#year").addEventListener("change", onYear);
+  $("#toggle-all").addEventListener("click", () => {
+    const all = state.selected.size !== state.allRsgs.length;
+    state.selected = new Set(all ? state.allRsgs : []);
+    $("#rsg-chips").querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", all));
+    render();
+  });
+  const title = $("#title"); title.value = state.title;
+  let tt; title.addEventListener("input", () => { clearTimeout(tt); tt = setTimeout(() => { state.title = title.value; store.set("title", state.title); render(); }, 250); });
+
+  document.querySelectorAll("#formats button").forEach((b) => {
+    b.setAttribute("aria-pressed", b.dataset.f === state.format);
+    b.addEventListener("click", () => {
+      state.format = b.dataset.f; store.set("format", state.format);
+      document.querySelectorAll("#formats button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      render();
+    });
+  });
+
+  wireDrop("#drop-photos", "#file-photos", async (files) => { files.forEach((f) => state.uploads.set(f.name.toLowerCase(), f.url)); toast(`${files.length} imagen${files.length === 1 ? "" : "es"} cargada${files.length === 1 ? "" : "s"}`); render(); });
+  wireDrop("#drop-footer", "#file-footer", async (files) => { state.footer = [...state.footer, ...files].sort((a, b) => a.name.localeCompare(b.name)); render(); });
+  $("#dl-all").addEventListener("click", downloadAll);
+
+  setData(parseTable(DEMO_MEMBERS), parseTable(DEMO_RSGS));
+  const saved = store.get("sheet", "");
+  if (saved) loadSheet();
+}
+
+if (window.Papa) init();
+else window.addEventListener("load", init);
+})();
+</script>
