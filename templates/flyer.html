@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --W: {{ fmt.w }}px;
+    --H: {{ fmt.h }}px;
+    --accent: {{ rsg.accent }};
+    --flag1: {{ rsg.flag[0] }};
+    --flag2: {{ rsg.flag[1] }};
+    --flag3: {{ rsg.flag[2] }};
+    --photo: {{ layout.photo }}px;
+    --cols: {{ layout.cols }};
+  }
+  {% include "base.css" %}
+  {% include "themes/" ~ theme ~ ".css" %}
+</style>
+</head>
+<body class="theme-{{ theme }} fmt-{{ fmt.name }} n-{{ members|length }}{% if members|length > 4 %} many{% endif %}">
+<main class="flyer">
+  <div class="bg" aria-hidden="true">{% include "themes/" ~ theme ~ "_bg.svg" ignore missing %}</div>
+
+  <header class="head">
+    <div class="titles">
+      <div class="year">{{ year }}</div>
+      <div class="subtitle">{{ title }}</div>
+      <h1 class="rsg-name">
+        {%- if rsg.display_name.startswith('RSG-') -%}
+          <span class="rsg-prefix">RSG-</span><span class="rsg-country">{{ rsg.display_name[4:] }}</span>
+        {%- else -%}
+          <span class="rsg-country">{{ rsg.display_name }}</span>
+        {%- endif -%}
+      </h1>
+      {% if rsg.website %}<div class="website">{{ rsg.website }}</div>{% endif %}
+    </div>
+
+    <div class="logo-wrap">
+      <div class="logo">
+        {% if rsg.logo_src %}
+          <img src="{{ rsg.logo_src }}" alt="">
+        {% else %}
+          <div class="logo-generated">
+            <div class="logo-kicker">Regional Student Group</div>
+            <div class="logo-flag {{ rsg.flag_layout }}"><i></i><i></i><i></i></div>
+            <div class="logo-country">{{ rsg.country }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <section class="team" style="--count: {{ members|length }}">
+    {% for m in members %}
+    <figure class="member">
+      <div class="ring">
+        {% if m.photo_src %}
+          <img class="photo" src="{{ m.photo_src }}" alt="">
+        {% else %}
+          <div class="photo initials">{{ m.initials }}</div>
+        {% endif %}
+      </div>
+      <figcaption>
+        <div class="role">{{ m.role }}</div>
+        <div class="name">{{ m.name }}</div>
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </section>
+
+  <footer class="foot">
+    <div class="contact">
+      {% if rsg.handle %}<span class="handle">{{ rsg.handle }}</span>{% endif %}
+      {% if rsg.email %}<span class="email"><small>RSG committee</small>{{ rsg.email }}</span>{% endif %}
+    </div>
+    <div class="partners">
+      {% for logo in footer_logos %}
+        <img src="{{ logo }}" alt="">
+      {% else %}
+        <span class="partner-text">ISCB Student Council</span>
+      {% endfor %}
+    </div>
+  </footer>
+</main>
+</body>
+</html>

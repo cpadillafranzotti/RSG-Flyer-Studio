@@ -1,0 +1,4 @@
+rsg,display_name,country,website,logo,flag_colors,flag_layout,accent,handle,email
+nigeria,RSG-Nigeria,Nigeria,rsg-nigeria.iscbsc.org,,#1f9d55|#ffffff|#1f9d55,vertical,#22c3d6,@iscbsc,rsg@iscbsc.org
+argentina,RSG-Argentina,Argentina,rsg-argentina.iscbsc.org,,#74acdf|#ffffff|#74acdf,horizontal,#74acdf,@iscbsc,rsg@iscbsc.org
+peru,RSG-Peru,Peru,rsg-peru.iscbsc.org,,#d91023|#ffffff|#d91023,vertical,#ff5a6b,@iscbsc,rsg@iscbsc.org

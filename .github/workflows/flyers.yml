@@ -1,0 +1,56 @@
+name: Generate RSG flyers
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Year to render (empty = latest in the sheet, 'all' = every year)"
+        required: false
+      rsg:
+        description: "RSG slug(s), comma separated (empty = all)"
+        required: false
+      theme:
+        description: "Theme(s): hex, clean, bold or all"
+        default: all
+      format:
+        description: "Format(s): square, portrait, story or all"
+        default: all
+  push:
+    paths: ["data/**", "templates/**", "assets/**", "generate.py"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt && python -m playwright install --with-deps chromium
+      - name: Render
+        env:
+          # Set these as repository *variables* (Settings → Secrets and variables → Actions → Variables)
+          # to read from Google Sheets instead of data/*.csv
+          MEMBERS_SRC: ${{ vars.MEMBERS_SHEET_URL || 'data/members.csv' }}
+          RSGS_SRC: ${{ vars.RSGS_SHEET_URL || 'data/rsgs.csv' }}
+        run: |
+          ARGS=""
+          [ -n "${{ inputs.year }}" ] && ARGS="$ARGS --year ${{ inputs.year }}"
+          [ -n "${{ inputs.rsg }}" ]  && ARGS="$ARGS --rsg ${{ inputs.rsg }}"
+          python generate.py $ARGS --theme "${{ inputs.theme || 'all' }}" --format "${{ inputs.format || 'all' }}"
+      - uses: actions/upload-artifact@v4
+        with: { name: rsg-flyers, path: output }
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: output }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

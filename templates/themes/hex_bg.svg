@@ -1,0 +1,18 @@
+<svg viewBox="0 0 1080 1080" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="hx" width="120" height="104" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+      <path d="M30 0h60l30 52-30 52H30L0 52z" fill="none" stroke="#2bb6c9" stroke-opacity=".16" stroke-width="2"/>
+    </pattern>
+    <radialGradient id="fade" cx="78%" cy="22%" r="70%">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset=".75" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="m"><rect width="1080" height="1080" fill="url(#fade)"/></mask>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#hx)" mask="url(#m)"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity=".07" stroke-width="2">
+    <path d="M-40 900c120-60 160 40 260 0s90-140 200-120 120 160 240 130"/>
+    <path d="M-20 980c100-40 180 30 270-10s120-120 220-90 150 130 260 110"/>
+    <circle cx="140" cy="960" r="70"/><circle cx="330" cy="1010" r="44"/>
+  </g>
+</svg>

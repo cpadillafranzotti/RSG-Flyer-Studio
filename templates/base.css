@@ -1,0 +1,84 @@
+/* Layout shared by every theme. Themes only change colour, type and decoration. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: var(--W); height: var(--H); overflow: hidden; }
+body { font-family: "Lexend", "Poppins", sans-serif; -webkit-font-smoothing: antialiased; }
+
+.flyer {
+  position: relative; width: var(--W); height: var(--H);
+  display: flex; flex-direction: column;
+  padding: 64px 72px 48px; overflow: hidden;
+}
+.bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.bg svg { width: 100%; height: 100%; display: block; }
+.head, .team, .foot { position: relative; z-index: 1; }
+.head, .foot { flex-shrink: 0; }
+
+/* ---------- header ---------- */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.titles { flex: 1; min-width: 0; padding-top: 6px; }
+.year { font-size: 96px; font-weight: 400; letter-spacing: 0.12em; line-height: 1; }
+.subtitle { font-size: 38px; font-weight: 300; letter-spacing: 0.14em; margin-top: 12px; }
+.rsg-name { font-size: 78px; font-weight: 600; line-height: 1; margin-top: 58px; letter-spacing: 0.01em; white-space: nowrap; }
+.website { font-size: 30px; font-weight: 300; letter-spacing: 0.16em; margin-top: 18px; }
+
+.logo-wrap { flex: 0 0 auto; width: 300px; height: 300px; margin: -20px -24px 0 0; }
+.logo { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: grid; place-items: center; container-type: size; }
+.logo img { width: 100%; height: 100%; object-fit: contain; }
+.logo-generated { display: flex; flex-direction: column; align-items: center; gap: 5cqw; text-align: center; }
+.logo-kicker { font-size: 5.6cqw; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; max-width: 62cqw; line-height: 1.3; }
+.logo-flag { display: flex; width: 40cqw; height: 40cqw; border-radius: 50%; overflow: hidden; }
+.logo-flag i { flex: 1; }
+.logo-flag.horizontal { flex-direction: column; }
+.logo-flag i:nth-child(1) { background: var(--flag1); }
+.logo-flag i:nth-child(2) { background: var(--flag2); }
+.logo-flag i:nth-child(3) { background: var(--flag3); }
+.logo-country { font-size: 10cqw; font-weight: 600; }
+
+/* ---------- team ---------- */
+.team {
+  flex: 1; min-height: 0; display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
+  column-gap: calc(var(--photo) * 0.3); row-gap: 22px;
+  max-width: calc(var(--cols) * var(--photo) + (var(--cols) - 1) * var(--photo) * 0.3 + 4px); margin: 0 auto; width: 100%;
+  padding: 20px 0 8px;
+}
+.member { display: flex; flex-direction: column; align-items: center; text-align: center; width: var(--photo); }
+.ring { width: var(--photo); height: var(--photo); border-radius: 50%; padding: calc(var(--photo) * 0.08); }
+.photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.initials { display: grid; place-items: center; font-size: calc(var(--photo) * 0.26); font-weight: 600; letter-spacing: 0.04em; }
+figcaption { margin-top: calc(var(--photo) * 0.09); width: calc(var(--photo) * 1.18); }
+.role { font-family: "Poppins", sans-serif; font-weight: 700; font-size: calc(14px + var(--photo) * 0.06); line-height: 1.15; }
+.name { font-size: calc(12px + var(--photo) * 0.055); font-weight: 400; letter-spacing: 0.1em; line-height: 1.4; margin-top: 6px; text-wrap: balance; }
+
+/* ---------- footer ---------- */
+.foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.contact { display: flex; gap: 40px; align-items: flex-end; }
+.handle { font-size: 30px; font-style: italic; letter-spacing: 0.12em; }
+.email { display: flex; flex-direction: column; font-size: 22px; font-style: italic; letter-spacing: 0.12em; }
+.email small { font-size: 18px; letter-spacing: 0.14em; }
+.partners { display: flex; gap: 28px; align-items: center; }
+.partners img { height: 84px; width: auto; }
+.partner-text { font-size: 20px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+
+/* ---------- portrait (4:5) and story (9:16) tweaks ---------- */
+.fmt-portrait .rsg-name { margin-top: 70px; }
+.fmt-story .flyer { padding: 120px 72px 96px; }
+.fmt-story .head { flex-direction: column-reverse; align-items: flex-start; }
+.fmt-story .logo-wrap, .fmt-story.many .logo-wrap { margin: 0 0 48px; width: 280px; height: 280px; }
+.fmt-story .rsg-name { margin-top: 40px; }
+.fmt-story .team { row-gap: 40px; }
+
+/* compact header when the team is large */
+.many .year { font-size: 80px; }
+.many .subtitle { font-size: 32px; margin-top: 8px; }
+.many .rsg-name { font-size: 66px; margin-top: 34px; }
+.many .website { font-size: 26px; margin-top: 12px; }
+.many .logo-wrap { width: 250px; height: 250px; }
+.fmt-story.many .year, .fmt-portrait.many .year { font-size: 96px; }
+
+/* story: more vertical room, so bigger type */
+.fmt-story .year { font-size: 130px; }
+.fmt-story .subtitle { font-size: 44px; }
+.fmt-story .rsg-name { font-size: 86px; }
+.fmt-story .website { font-size: 32px; }
+.fmt-story .role { font-size: calc(18px + var(--photo) * 0.06); }
+.fmt-story .name { font-size: calc(16px + var(--photo) * 0.055); }
