@@ -154,4 +154,8 @@ generate.py           batch renderer (Playwright + Chromium)
 .github/workflows/    pages.yml (publish app) · flyers.yml (batch render)
 ```
 
-Fonts: Lexend and Poppins, SIL Open Font License.
+## License
+
+The code is released under the [MIT License](LICENSE).
+Bundled fonts (Lexend, Poppins) are under the SIL Open Font License 1.1 (`web/fonts/OFL-*.txt`).
+The ISCB and ISCB Student Council names and logos belong to ISCB and are **not** covered by the MIT License; see [LICENSE](LICENSE) for details.
